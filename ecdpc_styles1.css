@@ -1,0 +1,36 @@
+#container 
+{
+    font-family: Calibri, Candara, Arial, sans-serif;
+    font-size: 12px;
+}
+
+#footer
+{
+    width: 90%;
+    margin: 0 auto;	
+}
+#date
+{
+	position: relative;
+ 	bottom: 130px;
+ 	font-size: 15px;
+ 	font-weight: bold;
+ 	color: #585858;
+}
+
+.graticule {
+    fill: none;
+    stroke: #79A09E;
+    stroke-width: 0.5;
+}
+
+.graticule.outline {
+    stroke: black;
+    stroke-width: 0.5;
+}
+
+path {
+    fill: #E0E4CC;
+    stroke: #ACAF9F;
+    stroke-width: 1;
+}

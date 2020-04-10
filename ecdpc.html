@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8">
+
+<title>Eddie's D3 visualisation</title>
+
+<!--CSS-->
+<link rel="stylesheet" type="text/css" href="/var/www/html/D3/CSS/ecdpc_styles1.css">
+
+<body>
+
+<!--Main layout of page-->
+
+<div id="container">
+
+    <div id="map">
+    </div>
+
+    <div id ="footer">
+        <div id="info">
+        Temporal and spatial distribution of worldwide daily COVID-19 deaths, by country. Area of the orange circles is in linear proportion to the number of deaths recorded. Virus data: <a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">European Centre for Disease Prevention and Control</a>. Country polygon data: <a href="https://www.naturalearthdata.com/"> Natural Earth</a>. Country centroid data: <a href="https://worldmap.harvard.edu/data/geonode:country_centroids_az8">WorldMap</a>. Projection: <a href="https://en.wikipedia.org/wiki/Kavrayskiy_VII_projection">Kavrayskiy VII</a>. Visualisation technology: <a href="https://d3js.org/">D3.js</a> and PHP. <a href="http://www.edwardboyle.com">Eddie Boyle</a> 2020.
+        </div>
+        <div id="date">
+        </div>
+        <div id="deaths">
+        </div>
+    </div>
+
+</div>
+
+<!-- load the d3.js libraries -->    
+<script src="/var/www/html/D3/JS/d3.v3.min.js"></script>
+<script src="/var/www/html/D3/JS/d3-geo.min.js"></script>
+<script src="/var/www/html/D3/JS/d3-geo-projection.min.js"></script>
+
+<script>
+
+//D3 code
+
+    //Width and height
+    var w = 1000;
+    var h = 400;
+
+    //Define path generator, using the Kavrayskiy VII projection
+    var projection = d3.geoKavrayskiy7()
+        .scale([200]);
+    var path = d3.geoPath()
+        .projection(projection);
+
+    //Create SVG element
+    var svg = d3.select("#map")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+    var graticule = d3.geo.graticule()
+        .step([20, 20]);
+
+    // Graticule lines (behind the country features)
+    var lines = svg.selectAll('path.graticule').data([graticule()]);
+
+    lines.enter().append('path').classed('graticule', true);
+    lines.attr('d', path);
+    lines.exit().remove();
+
+    svg.append("path")
+        .datum(graticule.outline)
+        .attr("class", "graticule outline")
+        .attr("d", path);
+
+    //Initial data retrieval
+    document.getElementById("date").innerHTML = "Date: 01/02/2020";
+
+    //Load in GeoJSON data for countries
+    d3.json("/var/www/html/D3/Data/ne_10m_admin_0_countries_simplified3.json", function(json) {   
+
+        //Bind data and create one path per GeoJSON feature (countries)
+        svg.selectAll("path")
+            .data(json.features)
+            .enter()
+            .append("path")
+            .attr("d", path);
+
+        //Load in daily CSV crunched virus data (first in set)
+        d3.csv("/var/www/html/D3/Data/ECDPC3/ecdpc_map_data_01022020.csv", function(data) {     
+
+            //Bind data and create one path per GeoJSON feature (centroids)
+            svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d) {
+                return projection([d.Lon, d.Lat])[0];
+            })
+            .attr("cy", function(d) {
+                 return projection([d.Lon, d.Lat])[1];
+            })
+            .style("stroke", "grey")
+            .style("fill", "orange")
+            .style("opacity", 0.3)
+            .attr("r", function(d) {
+                return (Math.sqrt((d.Deaths*5)/Math.PI));
+            });
+        });
+
+    });
+
+    //intital date variables
+    var day = 2;
+    var month = 2;
+    var year = "2020";
+
+    var date = new Date();
+    var cur_month = date.getMonth();
+    var cur_day = date.getDate();
+    var cur_month = cur_month + 1;
+
+    //Retrieve data from next file, every 1s
+    var inter = setInterval(function() {
+       updateMap();
+    }, 1000); 
+
+    //Update/refresh data from external file
+    function updateMap() 
+    {
+        if (day < 10)
+        {
+            day_label = "0" + day;
+        }
+        else
+        {
+            day_label = day;
+        }
+
+        if (month < 10)
+        {
+            month_label = "0" + month;
+        }
+        else
+        {
+            month_label = month;
+        }
+
+        var datestring = day_label + "/" + month_label + "/"  + year;
+        document.getElementById("date").innerHTML = "Date: " + datestring;
+
+        var next_filename = "/var/www/html/D3/Data/ECDPC3/ecdpc_map_data_" + day_label + month_label + "2020.csv";
+
+        //Load in daily CSV crunched virus data (next in set)
+        d3.csv(next_filename, function(data) {     
+
+            //Bind data and create one path per GeoJSON feature (centroids)
+            svg.selectAll("circle")
+            .data(data)
+            .transition()
+            .attr("cx", function(d) {
+                 return projection([d.Lon, d.Lat])[0];
+            })
+            .attr("cy", function(d) {
+                return projection([d.Lon, d.Lat])[1];
+            })
+            .style("stroke", "grey")
+            .style("fill", "orange")
+            .style("opacity", 0.3)
+            .attr("r", function(d) {
+                return (Math.sqrt((d.Deaths*5)/Math.PI));
+            });
+
+        });
+
+        if ((month == cur_month) && (day == cur_day))
+        {
+            //Go back to first day in set
+            day = 1;
+            month = 2;
+        }
+        else if ((month == 1 || month ==3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) && day == 31)
+        {
+            //Move on to first day of next month in set
+            day = 1;
+            month++;
+        }
+        else if (month == 2 && day == 29)
+        {
+            //Move on to first day of next month in set
+            day = 1;
+            month++;
+        }
+        else if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 30)
+        {
+            //Move on to first day of next month in set
+            day = 1;
+            month++;
+        }
+        else
+        {
+            //Move on to next day
+            day++;
+        }
+    }
+
+</script>

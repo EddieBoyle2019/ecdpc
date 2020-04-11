@@ -9,27 +9,48 @@
     width: 90%;
     margin: 0 auto;	
 }
+
 #date
 {
-	position: relative;
- 	bottom: 130px;
+    position: absolute;
+    top: 220px;
  	font-size: 15px;
  	font-weight: bold;
  	color: #585858;
+    left: 30px;
 }
 
-.graticule {
+#legend
+{
+    position: absolute;
+    top: 250px;
+    left: 30px;
+    font-size: 12px;
+    border: 1px solid gray;
+    background-color: white;
+}
+
+#legend_label
+{
+    text-align: center;
+    padding-bottom: 5px;
+}
+
+.graticule 
+{
     fill: none;
     stroke: #79A09E;
     stroke-width: 0.5;
 }
 
-.graticule.outline {
+.graticule.outline
+{
     stroke: black;
     stroke-width: 0.5;
 }
 
-path {
+path 
+{
     fill: #E0E4CC;
     stroke: #ACAF9F;
     stroke-width: 1;

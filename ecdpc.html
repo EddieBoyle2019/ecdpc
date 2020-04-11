@@ -5,7 +5,7 @@
 <title>Eddie's D3 visualisation</title>
 
 <!--CSS-->
-<link rel="stylesheet" type="text/css" href="/var/www/html/D3/CSS/ecdpc_styles1.css">
+<link rel="stylesheet" type="text/css" href="/D3/CSS/ecdpc_styles1.css">
 
 <body>
 
@@ -16,9 +16,14 @@
     <div id="map">
     </div>
 
+    <div id="legend">
+        <div id="legend_svg"></div>
+        <div id="legend_label">Legend</div>
+    </div>
+
     <div id ="footer">
         <div id="info">
-        Temporal and spatial distribution of worldwide daily COVID-19 deaths, by country. Area of the orange circles is in linear proportion to the number of deaths recorded. Virus data: <a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">European Centre for Disease Prevention and Control</a>. Country polygon data: <a href="https://www.naturalearthdata.com/"> Natural Earth</a>. Country centroid data: <a href="https://worldmap.harvard.edu/data/geonode:country_centroids_az8">WorldMap</a>. Projection: <a href="https://en.wikipedia.org/wiki/Kavrayskiy_VII_projection">Kavrayskiy VII</a>. Visualisation technology: <a href="https://d3js.org/">D3.js</a> and PHP. <a href="http://www.edwardboyle.com">Eddie Boyle</a> 2020.
+        <b>Temporal and spatial distribution of worldwide daily COVID-19 deaths, by country.</b> Area of the orange circles is in linear proportion to the number of deaths recorded. Virus data: <a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">European Centre for Disease Prevention and Control</a>. Country polygon data: <a href="https://www.naturalearthdata.com/"> Natural Earth</a>. Country centroid data: <a href="https://worldmap.harvard.edu/data/geonode:country_centroids_az8">WorldMap</a>. Projection: <a href="https://en.wikipedia.org/wiki/Kavrayskiy_VII_projection">Kavrayskiy VII</a>. Visualisation technology: <a href="https://d3js.org/">D3.js</a> and PHP. <a href="http://www.edwardboyle.com/blog/\?p=2719">Blog posting describing the development of this visualisation</a>. <a href="http://www.edwardboyle.com">Eddie Boyle</a> 2020.
         </div>
         <div id="date">
         </div>
@@ -29,9 +34,9 @@
 </div>
 
 <!-- load the d3.js libraries -->    
-<script src="/var/www/html/D3/JS/d3.v3.min.js"></script>
-<script src="/var/www/html/D3/JS/d3-geo.min.js"></script>
-<script src="/var/www/html/D3/JS/d3-geo-projection.min.js"></script>
+<script src="/D3/JS/d3.v3.min.js"></script>
+<script src="/D3/JS/d3-geo.min.js"></script>
+<script src="/D3/JS/d3-geo-projection.min.js"></script>
 
 <script>
 
@@ -53,10 +58,26 @@
         .attr("width", w)
         .attr("height", h);
 
+    //Legend
+    var svg2 = d3.select("#legend_svg")       
+        .append("svg")
+        .attr("width", 140)
+        .attr("height", 125);
+
+    svg2.append("circle").attr("cx", 68).attr("cy", 114).attr("r", 9).style("stroke", "#282828").style("fill", "orange").style("opacity", 0.3);
+    svg2.append("text").attr("x", 110).attr("y", 116).text("50").style("font-size", "12px");
+    svg2.append("circle").attr("cx", 68).attr("cy", 105).attr("r", 18).style("stroke", "#282828").style("fill", "orange").style("opacity", 0.3);
+    svg2.append("text").attr("x", 110).attr("y", 102).text("200").style("font-size", "12px");
+    svg2.append("circle").attr("cx", 68).attr("cy", 95).attr("r", 28).style("stroke", "#282828").style("fill", "orange").style("opacity", 0.3);
+    svg2.append("text").attr("x", 110).attr("y", 85).text("500").style("font-size", "12px");
+    svg2.append("circle").attr("cx", 68).attr("cy", 83).attr("r", 40).style("stroke", "#282828").style("fill", "orange").style("opacity", 0.3);
+    svg2.append("text").attr("x", 110).attr("y", 63).text("1000").style("font-size", "12px");
+    svg2.append("circle").attr("cx", 68).attr("cy", 67).attr("r", 56).style("stroke", "#282828").style("fill", "orange").style("opacity", 0.3);
+    svg2.append("text").attr("x", 110).attr("y", 35).text("2000").style("font-size", "12px");
+
+    //Graticule lines (behind the country features)
     var graticule = d3.geo.graticule()
         .step([20, 20]);
-
-    // Graticule lines (behind the country features)
     var lines = svg.selectAll('path.graticule').data([graticule()]);
 
     lines.enter().append('path').classed('graticule', true);
@@ -72,7 +93,7 @@
     document.getElementById("date").innerHTML = "Date: 01/02/2020";
 
     //Load in GeoJSON data for countries
-    d3.json("/var/www/html/D3/Data/ne_10m_admin_0_countries_simplified3.json", function(json) {   
+    d3.json("/D3/Data/ne_10m_admin_0_countries_simplified3.json", function(json) {   
 
         //Bind data and create one path per GeoJSON feature (countries)
         svg.selectAll("path")
@@ -82,7 +103,7 @@
             .attr("d", path);
 
         //Load in daily CSV crunched virus data (first in set)
-        d3.csv("/var/www/html/D3/Data/ECDPC3/ecdpc_map_data_01022020.csv", function(data) {     
+        d3.csv("/D3/Data/ECDPC3/ecdpc_map_data_01022020.csv", function(data) {     
 
             //Bind data and create one path per GeoJSON feature (centroids)
             svg.selectAll("circle")
@@ -95,7 +116,7 @@
             .attr("cy", function(d) {
                  return projection([d.Lon, d.Lat])[1];
             })
-            .style("stroke", "grey")
+            .style("stroke", "#282828")
             .style("fill", "orange")
             .style("opacity", 0.3)
             .attr("r", function(d) {
@@ -144,7 +165,7 @@
         var datestring = day_label + "/" + month_label + "/"  + year;
         document.getElementById("date").innerHTML = "Date: " + datestring;
 
-        var next_filename = "/var/www/html/D3/Data/ECDPC3/ecdpc_map_data_" + day_label + month_label + "2020.csv";
+        var next_filename = "/D3/Data/ECDPC3/ecdpc_map_data_" + day_label + month_label + "2020.csv";
 
         //Load in daily CSV crunched virus data (next in set)
         d3.csv(next_filename, function(data) {     
@@ -159,7 +180,7 @@
             .attr("cy", function(d) {
                 return projection([d.Lon, d.Lat])[1];
             })
-            .style("stroke", "grey")
+            .style("stroke", "#282828")
             .style("fill", "orange")
             .style("opacity", 0.3)
             .attr("r", function(d) {

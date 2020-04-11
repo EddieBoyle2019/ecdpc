@@ -1,7 +1,6 @@
 <?php
 
 //find current date in format required
-
 $date_d = date("d");
 $date_m = date("m");
 $date_y = date("y");
@@ -34,7 +33,6 @@ foreach($json1_array['features'] as $feature)
 {
 	foreach($feature as $key => $value)
 	{
-		$found = 0;
 
 		if (strcmp($key, "geometry") == 0)
 		{
@@ -52,6 +50,7 @@ foreach($json1_array['features'] as $feature)
 		{
 			foreach($value as $property_key => $property_value)
 			{
+				$found = 0;
 
 				if (strcmp ($property_key, "gu_a3") == 0)
 				{	
@@ -62,6 +61,7 @@ foreach($json1_array['features'] as $feature)
 						$cur_lon_value = "2";
 						$cur_lat_value = "46";
 					}
+					//Special cases for France and USA
 					if (strcmp($property_value, "USA") == 0)
 					{
 						$cur_lon_value = "-98";

@@ -21,6 +21,13 @@
         <div id="legend_label">Legend</div>
     </div>
 
+    <input type="checkbox" id="values" name="values">
+    <label for="values"> Display values&nbsp;&nbsp;</label>
+
+    <button id="pauseButton">Pause</button>
+
+    <hr/>
+
     <div id ="footer">
         <div id="info">
         <b>Temporal and spatial distribution of worldwide daily COVID-19 deaths, by country.</b> Area of the orange circles is in linear proportion to the number of deaths recorded. Virus data: <a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">European Centre for Disease Prevention and Control</a>. Country polygon data: <a href="https://www.naturalearthdata.com/"> Natural Earth</a>. Country centroid data: <a href="https://worldmap.harvard.edu/data/geonode:country_centroids_az8">WorldMap</a>. Projection: <a href="https://en.wikipedia.org/wiki/Kavrayskiy_VII_projection">Kavrayskiy VII</a>. Visualisation technology: <a href="https://d3js.org/">D3.js</a> and PHP. <a href="http://www.edwardboyle.com/blog/\?p=2719">Blog posting describing the development of this visualisation</a>. <a href="http://www.edwardboyle.com">Eddie Boyle</a> 2020.
@@ -58,6 +65,9 @@
         .attr("width", w)
         .attr("height", h);
 
+    var graticule = d3.geo.graticule()
+        .step([20, 20]);
+
     //Legend
     var svg2 = d3.select("#legend_svg")       
         .append("svg")
@@ -75,9 +85,7 @@
     svg2.append("circle").attr("cx", 68).attr("cy", 67).attr("r", 56).style("stroke", "#282828").style("fill", "orange").style("opacity", 0.3);
     svg2.append("text").attr("x", 110).attr("y", 35).text("2000").style("font-size", "12px");
 
-    //Graticule lines (behind the country features)
-    var graticule = d3.geo.graticule()
-        .step([20, 20]);
+    // Graticule lines (behind the country features)
     var lines = svg.selectAll('path.graticule').data([graticule()]);
 
     lines.enter().append('path').classed('graticule', true);
@@ -105,7 +113,7 @@
         //Load in daily CSV crunched virus data (first in set)
         d3.csv("/D3/Data/ECDPC3/ecdpc_map_data_01022020.csv", function(data) {     
 
-            //Bind data and create one path per GeoJSON feature (centroids)
+            //Bind data and create circles for each country's data values
             svg.selectAll("circle")
             .data(data)
             .enter()
@@ -122,6 +130,12 @@
             .attr("r", function(d) {
                 return (Math.sqrt((d.Deaths*5)/Math.PI));
             });
+
+            svg.selectAll("text")
+            .data(data)
+            .enter()
+            .append("text")
+
         });
 
     });
@@ -136,10 +150,29 @@
     var cur_day = date.getDate();
     var cur_month = cur_month + 1;
 
-    //Retrieve data from next file, every 1s
+    //Retrieve data from next file, every 0.5s
     var inter = setInterval(function() {
        updateMap();
-    }, 1000); 
+    }, 500); 
+
+    //Pause/resume function
+    var button = document.querySelector('button');
+
+    button.addEventListener('click', function() {
+        if(!!inter) 
+        {
+            clearInterval(inter);
+            inter = undefined;
+            document.getElementById('pauseButton').innerHTML = "Resume";
+        } 
+        else
+        {
+            document.getElementById('pauseButton').innerHTML = "Pause";
+            inter = setInterval(function() {
+                updateMap();
+            }, 500);
+        }
+    });
 
     //Update/refresh data from external file
     function updateMap() 
@@ -170,7 +203,7 @@
         //Load in daily CSV crunched virus data (next in set)
         d3.csv(next_filename, function(data) {     
 
-            //Bind data and create one path per GeoJSON feature (centroids)
+            //Bind data and create circles for each country's data values
             svg.selectAll("circle")
             .data(data)
             .transition()
@@ -186,6 +219,33 @@
             .attr("r", function(d) {
                 return (Math.sqrt((d.Deaths*5)/Math.PI));
             });
+
+            if(document.getElementById('values').checked) 
+            {
+                svg.selectAll("text")
+                .data(data)
+                .transition()
+                .attr("x", function(d) {
+                    return (projection([d.Lon, d.Lat])[0])-6;
+                })
+                .attr("y", function(d) {
+                    return (projection([d.Lon, d.Lat])[1])+3;
+                })
+                .text(function(d) {
+                    return (d.Deaths);
+                })
+                .attr("font-family", "Calibri, Candara, Arial")
+                .attr("font-size", "10px")
+                .attr("fill", "#696969")
+                .style("visibility", function (d) {
+                    if (d.Deaths == 0) {return "hidden";} else {return "visible";} 
+                });
+            }
+            else
+            {
+                svg.selectAll("text")
+                .style("visibility", "hidden");
+            }
 
         });
 
@@ -219,5 +279,6 @@
             day++;
         }
     }
+
 
 </script>

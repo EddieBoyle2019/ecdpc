@@ -55,3 +55,10 @@ path
     stroke: #ACAF9F;
     stroke-width: 1;
 }
+
+#pauseButton
+{
+    font-family: Calibri, Candara, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+}

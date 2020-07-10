@@ -56,9 +56,9 @@ path
 {
     position: absolute;
     top: 420px;
-    left: 20px;
     font-size: 12px;
     width: 980px;
+    margin: 0 auto; 
 }
 
 #values_control

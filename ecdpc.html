@@ -5,7 +5,7 @@
 <title>Eddie's D3 visualisation</title>
 
 <!--CSS-->
-<link rel="stylesheet" type="text/css" href="/D3/CSS/ecdpc_styles1.css">
+<link rel="stylesheet" type="text/css" href="/D3/CSS/ecdpc_styles2.css">
 
 <body>
 
@@ -16,26 +16,25 @@
     <div id="map">
     </div>
 
+    <div id="date">
+    </div>
+
     <div id="legend">
         <div id="legend_svg"></div>
         <div id="legend_label">Legend</div>
     </div>
 
-    <input type="checkbox" id="values" name="values">
-    <label for="values"> Display values&nbsp;&nbsp;</label>
-
-    <button id="pauseButton">Pause</button>
-
-    <hr/>
+    <div id="controls">
+        <div id="values_control">
+        <input type="checkbox" id="values" name="values">
+        <label for="values"> Display values&nbsp;&nbsp;</label>
+        <button id="pauseButton">Pause</button>
+        </div>
+    </div>
 
     <div id ="footer">
-        <div id="info">
+        <hr/>
         <b>Temporal and spatial distribution of worldwide daily COVID-19 deaths, by country.</b> Area of the orange circles is in linear proportion to the number of deaths recorded. Virus data: <a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">European Centre for Disease Prevention and Control</a>. Country polygon data: <a href="https://www.naturalearthdata.com/"> Natural Earth</a>. Country centroid data: <a href="https://worldmap.harvard.edu/data/geonode:country_centroids_az8">WorldMap</a>. Projection: <a href="https://en.wikipedia.org/wiki/Kavrayskiy_VII_projection">Kavrayskiy VII</a>. Visualisation technology: <a href="https://d3js.org/">D3.js</a> and PHP. <a href="http://www.edwardboyle.com/blog/\?p=2719">Blog posting describing the development of this visualisation</a>. <a href="http://www.edwardboyle.com">Eddie Boyle</a> 2020.
-        </div>
-        <div id="date">
-        </div>
-        <div id="deaths">
-        </div>
     </div>
 
 </div>
@@ -113,7 +112,7 @@
         //Load in daily CSV crunched virus data (first in set)
         d3.csv("/D3/Data/ECDPC3/ecdpc_map_data_01022020.csv", function(data) {     
 
-            //Bind data and create circles for each country's data values
+            //Bind data and create circles and text for each country's data values
             svg.selectAll("circle")
             .data(data)
             .enter()
@@ -140,7 +139,7 @@
 
     });
 
-    //intital date variables
+    //Intital date variables (for first update loop)
     var day = 2;
     var month = 2;
     var year = "2020";
@@ -149,6 +148,17 @@
     var cur_month = date.getMonth();
     var cur_day = date.getDate();
     var cur_month = cur_month + 1;
+
+    //Calculate dates of full dataset for animated timeline 
+    var startDate = new Date("2020-02-01");
+    var endDate = date;
+    var timeDiff  = endDate - startDate;
+    var tot_days = Math.round(timeDiff / (1000 * 60 * 60 * 24));
+
+    //Values for animated timeline
+    var currentValue = 0;
+    var targetValue = w-250;
+    var currentValue = currentValue + (targetValue/tot_days);
 
     //Retrieve data from next file, every 0.5s
     var inter = setInterval(function() {
@@ -174,6 +184,56 @@
         }
     });
 
+    //Animated timeline graphic
+    var x = d3.time.scale()
+        .domain([startDate, endDate])
+        .range([0, targetValue])
+        .clamp(true);
+
+    var formatDateIntoMonth = d3.time.format("%m");
+    var formatDate = d3.time.format("%d %b %Y");
+
+    var margin = {top:0, right:50, bottom:0, left:20},
+        width = 800 - margin.left - margin.right,
+        height = 40 - margin.top - margin.bottom;
+
+    var svg3 = d3.select("#controls")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+    var slider = svg3.append("g")
+        .attr("class", "slider")
+        .attr("transform", "translate(" + margin.left + "," + 10 + ")");
+
+    slider.append("line")
+        .attr("class", "track")
+        .attr("x1", x.range()[0])
+        .attr("x2", x.range()[1])
+        .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-inset")
+        .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-overlay");
+
+    var handle = slider.insert("circle", ".track-overlay")
+        .attr("class", "handle")
+        .attr("r", 9);
+
+    var label = slider.append("text")  
+        .attr("class", "slider_label")
+        .attr("text-anchor", "middle")
+        .text(formatDate(startDate))
+        .attr("transform", "translate(7," + (18) + ")");
+
+    //Update position and text of animated timeline label according to slider scale
+    function update_slider(h) 
+    {
+        handle.attr("cx", x(h));
+        label
+            .attr("x", x(h))
+            .text(formatDate(h));
+    }
+
     //Update/refresh data from external file
     function updateMap() 
     {
@@ -195,6 +255,9 @@
             month_label = month;
         }
 
+        update_slider(x.invert(currentValue));
+        currentValue = currentValue + (targetValue/tot_days);
+
         var datestring = day_label + "/" + month_label + "/"  + year;
         document.getElementById("date").innerHTML = "Date: " + datestring;
 
@@ -203,7 +266,7 @@
         //Load in daily CSV crunched virus data (next in set)
         d3.csv(next_filename, function(data) {     
 
-            //Bind data and create circles for each country's data values
+            //Bind data and create circles and text for each country's data values
             svg.selectAll("circle")
             .data(data)
             .transition()
@@ -254,6 +317,7 @@
             //Go back to first day in set
             day = 1;
             month = 2;
+            currentValue = 0;
         }
         else if ((month == 1 || month ==3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) && day == 31)
         {
@@ -279,6 +343,5 @@
             day++;
         }
     }
-
 
 </script>

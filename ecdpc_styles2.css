@@ -4,12 +4,6 @@
     font-size: 12px;
 }
 
-#footer
-{
-    width: 90%;
-    margin: 0 auto;	
-}
-
 #date
 {
     position: absolute;
@@ -56,44 +50,63 @@ path
     stroke-width: 1;
 }
 
+#controls
+{
+    position: absolute;
+    top: 420px;
+    left: 20px;
+    font-size: 12px;
+    width: 980px;
+}
+
+#values_control
+{
+    float:left;
+}
+
 #pauseButton
 {
     font-family: Calibri, Candara, Arial, sans-serif;
     font-size: 12px;
     font-weight: bold;
+    width: 60px;
 }
 
-    .ticks {
-      font-size: 10px;
-    }
+.track,
+.track-inset
+{
+    stroke-linecap: round;
+}
 
-    .track,
-    .track-inset,
-    .track-overlay {
-      stroke-linecap: round;
-    }
+.track 
+{
+    stroke: #000;
+    stroke-opacity: 0.3;
+    stroke-width: 10px;
+}
 
-    .track {
-      stroke: #000;
-      stroke-opacity: 0.3;
-      stroke-width: 10px;
-    }
+.track-inset 
+{
+    stroke: #dcdcdc;
+    stroke-width: 8px;
+}
 
-    .track-inset {
-      stroke: #dcdcdc;
-      stroke-width: 8px;
-    }
+.handle {
+    fill: #fff;
+    stroke: #000;
+    stroke-opacity: 0.5;
+    stroke-width: 1.25px;
+}
 
-    .track-overlay {
-      pointer-events: stroke;
-      stroke-width: 50px;
-      stroke: transparent;
-      cursor: crosshair;
-    }
+.slider_label 
+{
+    font-size: 10px;
+}
 
-    .handle {
-      fill: #fff;
-      stroke: #000;
-      stroke-opacity: 0.5;
-      stroke-width: 1.25px;
-    }
+#footer
+{
+    position: absolute;
+    top: 450px;
+    width: 95%;
+    margin: 0 auto; 
+}

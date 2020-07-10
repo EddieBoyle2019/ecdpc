@@ -2,6 +2,8 @@
 {
     font-family: Calibri, Candara, Arial, sans-serif;
     font-size: 12px;
+    margin: auto; 
+    max-width: 1000px;
 }
 
 #date
@@ -107,6 +109,6 @@ path
 {
     position: absolute;
     top: 450px;
-    width: 95%;
     margin: 0 auto; 
+    max-width: 1000px;
 }

@@ -55,7 +55,7 @@ path
 #controls
 {
     position: absolute;
-    top: 420px;
+    top: 412px;
     font-size: 12px;
     width: 980px;
     margin: 0 auto; 
@@ -72,6 +72,11 @@ path
     font-size: 12px;
     font-weight: bold;
     width: 60px;
+}
+
+.ticks 
+{
+    font-size: 10px;
 }
 
 .track,

@@ -139,8 +139,8 @@
 
     });
 
-    //Intital date variables (for first update loop)
-    var day = 2;
+    //Intital date variables
+    var day = 1;
     var month = 2;
     var year = "2020";
 
@@ -153,12 +153,11 @@
     var startDate = new Date("2020-02-01");
     var endDate = date;
     var timeDiff  = endDate - startDate;
-    var tot_days = Math.round(timeDiff / (1000 * 60 * 60 * 24));
+    var tot_days = Math.trunc(timeDiff / (1000 * 60 * 60 * 24));
 
     //Values for animated timeline
     var currentValue = 0;
     var targetValue = w-250;
-    var currentValue = currentValue + (targetValue/tot_days);
 
     //Retrieve data from next file, every 0.5s
     var inter = setInterval(function() {
@@ -190,7 +189,7 @@
         .range([0, targetValue])
         .clamp(true);
 
-    var formatDateIntoMonth = d3.time.format("%m");
+    var formatDateIntoMonth = d3.time.format("%b");
     var formatDate = d3.time.format("%d %b %Y");
 
     var margin = {top:0, right:50, bottom:0, left:20},
@@ -204,7 +203,7 @@
 
     var slider = svg3.append("g")
         .attr("class", "slider")
-        .attr("transform", "translate(" + margin.left + "," + 10 + ")");
+        .attr("transform", "translate(" + margin.left + "," + 15 + ")");
 
     slider.append("line")
         .attr("class", "track")
@@ -214,6 +213,18 @@
         .attr("class", "track-inset")
         .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
         .attr("class", "track-overlay");
+
+    slider.insert("g", ".track-overlay")
+        .attr("class", "ticks")
+        .attr("transform", "translate(0," + (-18) + ")")
+        .selectAll("text")
+        .data(x.ticks(10))
+        .enter()
+        .append("text")
+        .attr("x", x)
+        .attr("y", 10)
+        .attr("text-anchor", "middle")
+        .text(function(d) { return formatDateIntoMonth(d); });
 
     var handle = slider.insert("circle", ".track-overlay")
         .attr("class", "handle")
@@ -237,6 +248,41 @@
     //Update/refresh data from external file
     function updateMap() 
     {
+        if ((month == cur_month) && (day == cur_day))
+        {
+            //Go back to first day in set
+            day = 1;
+            month = 2;
+            currentValue = 0;
+        }
+        else if ((month == 1 || month ==3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) && day == 31)
+        {
+            //Move on to first day of next month in set
+            day = 1;
+            month++;
+            currentValue = currentValue + (targetValue/tot_days);
+        }
+        else if (month == 2 && day == 29) //2020 Leap year Feb
+        {
+            //Move on to first day of next month in set
+            day = 1;
+            month++;
+            currentValue = currentValue + (targetValue/tot_days);
+        }
+        else if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 30)
+        {
+            //Move on to first day of next month in set
+            day = 1;
+            month++;
+            currentValue = currentValue + (targetValue/tot_days);
+        }
+        else
+        {
+            //Move on to next day
+            day++;
+            currentValue = currentValue + (targetValue/tot_days);
+        }
+
         if (day < 10)
         {
             day_label = "0" + day;
@@ -256,7 +302,6 @@
         }
 
         update_slider(x.invert(currentValue));
-        currentValue = currentValue + (targetValue/tot_days);
 
         var datestring = day_label + "/" + month_label + "/"  + year;
         document.getElementById("date").innerHTML = "Date: " + datestring;
@@ -312,36 +357,6 @@
 
         });
 
-        if ((month == cur_month) && (day == cur_day))
-        {
-            //Go back to first day in set
-            day = 1;
-            month = 2;
-            currentValue = 0;
-        }
-        else if ((month == 1 || month ==3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) && day == 31)
-        {
-            //Move on to first day of next month in set
-            day = 1;
-            month++;
-        }
-        else if (month == 2 && day == 29)
-        {
-            //Move on to first day of next month in set
-            day = 1;
-            month++;
-        }
-        else if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 30)
-        {
-            //Move on to first day of next month in set
-            day = 1;
-            month++;
-        }
-        else
-        {
-            //Move on to next day
-            day++;
-        }
     }
 
 </script>

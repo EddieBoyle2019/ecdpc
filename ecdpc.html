@@ -5,7 +5,7 @@
 <title>Eddie's D3 visualisation</title>
 
 <!--CSS-->
-<link rel="stylesheet" type="text/css" href="/D3/CSS/ecdpc_styles2.css">
+<link rel="stylesheet" type="text/css" href="/D3/CSS/ecdpc_styles3.css">
 
 <body>
 
@@ -25,10 +25,19 @@
     </div>
 
     <div id="controls">
+        <div id="pause_control">
+            <button id="pauseButton">Pause</button>
+        </div>
+    </div>
+
+    <div id="zoompan">
         <div id="values_control">
-        <input type="checkbox" id="values" name="values">
-        <label for="values"> Display values&nbsp;&nbsp;</label>
-        <button id="pauseButton">Pause</button>
+            <label class="checkbox-label" for="values">Display values</label>
+            <input type="checkbox" id="values" name="values"></input>
+        </div>
+        <div id="zoompan_control">
+            Use mouse button and wheel to pan and zoom the map
+            <button id="resetButton">Reset map</button>
         </div>
     </div>
 
@@ -62,7 +71,11 @@
     var svg = d3.select("#map")
         .append("svg")
         .attr("width", w)
-        .attr("height", h);
+        .attr("height", h)
+        .call(d3.behavior.zoom().on("zoom", function () {
+            svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+        }))
+        .append("g");
 
     var graticule = d3.geo.graticule()
         .step([20, 20]);
@@ -157,7 +170,7 @@
 
     //Values for animated timeline
     var currentValue = 0;
-    var targetValue = w-250;
+    var targetValue = w-200;
 
     //Retrieve data from next file, every 0.5s
     var inter = setInterval(function() {
@@ -165,9 +178,9 @@
     }, 500); 
 
     //Pause/resume function
-    var button = document.querySelector('button');
+    var button1 = document.querySelector('#pauseButton');
 
-    button.addEventListener('click', function() {
+    button1.addEventListener('click', function() {
         if(!!inter) 
         {
             clearInterval(inter);
@@ -183,6 +196,13 @@
         }
     });
 
+    //Reset map function
+    var button2 = document.querySelector('#resetButton');
+
+    button2.addEventListener('click', function() {
+        svg.transition().duration(500).attr("transform", d3.zoomIdentity)  
+    });
+
     //Animated timeline graphic
     var x = d3.time.scale()
         .domain([startDate, endDate])
@@ -193,7 +213,7 @@
     var formatDate = d3.time.format("%d %b %Y");
 
     var margin = {top:0, right:50, bottom:0, left:20},
-        width = 800 - margin.left - margin.right,
+        width = 850 - margin.left - margin.right,
         height = 40 - margin.top - margin.bottom;
 
     var svg3 = d3.select("#controls")

@@ -61,7 +61,7 @@ path
     margin: 0 auto; 
 }
 
-#values_control
+#pause_control
 {
     float:left;
 }
@@ -74,13 +74,34 @@ path
     width: 60px;
 }
 
+#zoompan
+{
+    position: absolute;
+    top: 450px;
+    width: 550px;
+}
+
+#zoompan_control
+{
+    padding-left: 150px;
+}
+
+#resetButton
+{
+    font-family: Calibri, Candara, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    width: 69px;
+    margin-left: 20px;
+}
+
 .ticks 
 {
     font-size: 10px;
 }
 
 .track,
-.track-inset.
+.track-inset,
 .track-overlay
 {
     stroke-linecap: round;
@@ -99,11 +120,11 @@ path
     stroke-width: 8px;
 }
 
-.track-overlay {
+.track-overlay 
+{
       pointer-events: stroke;
       stroke-width: 50px;
       stroke: transparent;
-      cursor: crosshair;
 }
 
 .handle {
@@ -121,7 +142,20 @@ path
 #footer
 {
     position: absolute;
-    top: 450px;
+    top: 470px;
     margin: 0 auto; 
     max-width: 1000px;
+}
+
+input[type="checkbox"], label {
+    float: left;
+    line-height: 1.6em;
+    height: 1.6em;
+    margin: 0px 2px;
+    padding: 0px;
+    font-size: inherit;
+}
+
+label {
+    clear: left;
 }
